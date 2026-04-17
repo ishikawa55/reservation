@@ -1,0 +1,57 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ユーザー（患者・医師）
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  password      String
+  name          String
+  role          Role          @default(PATIENT)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reservations  Reservation[]
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+}
+
+// 治療内容（定期検診、虫歯治療など）
+model Treatment {
+  id           String        @id @default(cuid())
+  name         String
+  duration     Int           // 所要時間（分単位）
+  reservations Reservation[]
+}
+
+// 予約データ
+model Reservation {
+  id          String    @id @default(cuid())
+  startTime   DateTime
+  endTime     DateTime
+  status      Status    @default(PENDING)
+  
+  // リレーション
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  treatmentId String
+  treatment   Treatment @relation(fields: [treatmentId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum Status {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
