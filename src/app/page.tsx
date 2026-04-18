@@ -1,65 +1,55 @@
-import Image from "next/image";
+// src/app/page.tsx
+import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  // サーバー側でログイン状態を取得
+  const session = await getServerSession(authOptions);
+
+  // ログインしていなければ、NextAuthのログイン画面へ強制リダイレクト
+  if (!session) {
+    redirect("/api/auth/signin");
+  }
+
+  // session.user.role には "DOCTOR" か "PATIENT" が入っています
+  const isDoctor = session.user.role === "DOCTOR";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen p-8 bg-gray-50 text-gray-800">
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold mb-4 border-b pb-2">歯科予約システム</h1>
+        
+        <div className="mb-8">
+          <p className="text-lg">ようこそ、<span className="font-bold">{session.user.name}</span> さん</p>
+          <p className="text-sm text-gray-500 mt-1">
+            権限: {isDoctor ? "院長（管理者）" : "患者"}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        {/* ロールによる表示の切り替え */}
+        {isDoctor ? (
+          <div className="p-6 bg-blue-50 border border-blue-200 rounded-md">
+            <h2 className="text-xl font-bold text-blue-800 mb-4">🏥 院長用ダッシュボード</h2>
+            <p className="mb-4">ここに以下の機能を実装していきます：</p>
+            <ul className="list-disc ml-6 space-y-2 text-blue-900">
+              <li>本日の予約一覧とスケジュール管理</li>
+              <li>治療メニュー（所要時間）の登録・編集</li>
+              <li>休診日や営業時間の枠設定</li>
+            </ul>
+          </div>
+        ) : (
+          <div className="p-6 bg-green-50 border border-green-200 rounded-md">
+            <h2 className="text-xl font-bold text-green-800 mb-4">🦷 患者用ダッシュボード</h2>
+            <p className="mb-4">ここに以下の機能を実装していきます：</p>
+            <ul className="list-disc ml-6 space-y-2 text-green-900">
+              <li>新規予約の作成（空き時間の検索）</li>
+              <li>過去の予約履歴の確認</li>
+              <li>予約のキャンセル手続き</li>
+            </ul>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
