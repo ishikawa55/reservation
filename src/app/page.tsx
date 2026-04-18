@@ -3,6 +3,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function Home() {
   // サーバー側でログイン状態を取得
@@ -35,7 +36,11 @@ export default async function Home() {
             <p className="mb-4">ここに以下の機能を実装していきます：</p>
             <ul className="list-disc ml-6 space-y-2 text-blue-900">
               <li>本日の予約一覧とスケジュール管理</li>
-              <li>治療メニュー（所要時間）の登録・編集</li>
+              <li>
+                <Link href="/doctor/treatments" className="underline font-bold">
+                治療メニュー（所要時間）の登録・編集
+                </Link>
+                </li>
               <li>休診日や営業時間の枠設定</li>
             </ul>
           </div>
