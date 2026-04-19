@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
+import { reservationSchema } from "@/types/schemas";
 
 // 空き枠を取得する関数
 export async function getAvailableSlots(dateStr: string, treatmentId: string) {
@@ -65,11 +66,17 @@ export async function getAvailableSlots(dateStr: string, treatmentId: string) {
 
 // 予約をDBに保存する関数
 export async function createReservation(dateStr: string, timeStr: string, treatmentId: string) {
+  const validatedFields = reservationSchema.safeParse({ dateStr, timeStr, treatmentId });
+  
+  if (!validatedFields.success) {
+    return { error: validatedFields.error.issues[0]?.message || "入力内容にエラーがあります" };
+  }
+  
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) throw new Error("ログインが必要です");
+  if (!session?.user?.id) return { error: "ログインが必要です" };
 
   const treatment = await prisma.treatment.findUnique({ where: { id: treatmentId } });
-  if (!treatment) throw new Error("治療メニューが見つかりません");
+  if (!treatment) return { error: "治療メニューが見つかりません" };
 
   const startTime = new Date(`${dateStr}T${timeStr}:00+09:00`);
   const endTime = new Date(startTime.getTime() + treatment.duration * 60 * 1000);
@@ -84,7 +91,7 @@ export async function createReservation(dateStr: string, timeStr: string, treatm
   });
 
   if (existing) {
-    throw new Error("申し訳ありません、この時間はすでに予約が埋まってしまいました。");
+    return { error: "申し訳ありません、この時間はすでに予約が埋まってしまいました。" };
   }
 
   await prisma.reservation.create({
@@ -96,6 +103,12 @@ export async function createReservation(dateStr: string, timeStr: string, treatm
       status: "CONFIRMED",
     },
   });
+
+  // 予約が成功したら、患者と院長の両方の画面を最新化
+  revalidatePath("/");
+  revalidatePath("/doctor/reservations");
+  
+  return { success: true };
 }
 
 // 自分の予約一覧を取得する

@@ -41,11 +41,15 @@ export default function ReservationForm({ treatments }: { treatments: Treatment[
     if (!date || !treatmentId || !selectedSlot) return;
     setIsLoading(true);
     try {
-      await createReservation(date, selectedSlot, treatmentId);
-      toast.success("予約が完了しました！");
-      router.push("/"); // トップページへ戻る
+      const result = await createReservation(date, selectedSlot, treatmentId);
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("予約が完了しました！");
+        router.push("/"); // トップページへ戻る
+      }
     } catch (error: any) {
-      toast.error(error.message || "予約に失敗しました");
+      toast.error("通信エラーが発生しました");
     }
     setIsLoading(false);
   };
