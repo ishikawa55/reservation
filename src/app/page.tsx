@@ -11,13 +11,8 @@ export default async function Home() {
   // サーバー側でログイン状態を取得
   const session = await getServerSession(authOptions);
 
-  // ログインしていなければ、NextAuthのログイン画面へ強制リダイレクト
-  if (!session) {
-    redirect("/api/auth/signin");
-  }
-
   // session.user.role には "DOCTOR" か "PATIENT" が入っています
-  const isDoctor = session.user.role === "DOCTOR";
+  const isDoctor = session?.user?.role === "DOCTOR";
 
   // 患者の場合、自分の予約を取得
   const appointments = !isDoctor ? await getMyAppointments() : [];
@@ -28,7 +23,7 @@ export default async function Home() {
         <h1 className="text-2xl font-bold mb-4 border-b pb-2">歯科予約システム</h1>
         
         <div className="mb-8">
-          <p className="text-lg">ようこそ、<span className="font-bold">{session.user.name}</span> さん</p>
+          <p className="text-lg">ようこそ、<span className="font-bold">{session?.user?.name}</span> さん</p>
           <p className="text-sm text-gray-500 mt-1">
             権限: {isDoctor ? "院長（管理者）" : "患者"}
           </p>
