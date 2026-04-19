@@ -41,7 +41,11 @@ export default async function Home() {
             <h2 className="text-xl font-bold text-blue-800 mb-4">🏥 院長用ダッシュボード</h2>
             <p className="mb-4">ここに以下の機能を実装していきます：</p>
             <ul className="list-disc ml-6 space-y-2 text-blue-900">
-              <li>本日の予約一覧とスケジュール管理</li>
+              <li>
+                <Link href="/doctor/reservations" className="underline font-bold hover:text-blue-700">
+                本日の予約一覧とスケジュール管理
+                </Link>
+              </li>
               <li>
                 <Link href="/doctor/treatments" className="underline font-bold">
                 治療メニュー（所要時間）の登録・編集

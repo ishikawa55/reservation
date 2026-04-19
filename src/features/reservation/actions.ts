@@ -5,6 +5,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { revalidatePath } from "next/cache";
 
 // 空き枠を取得する関数
 export async function getAvailableSlots(dateStr: string, treatmentId: string) {
@@ -126,5 +127,7 @@ export async function cancelReservation(formData: FormData) {
     data: { status: 'CANCELLED' }
   });
 
+  // 患者用ダッシュボードと、院長用スケジュール画面の両方を最新化する
   revalidatePath("/");
+  revalidatePath("/doctor/reservations");
 }
