@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { cancelReservation } from "@/features/reservation/actions";
+import DoctorCalendar from "@/features/reservation/components/DoctorCalendar";
 
 export default async function DoctorReservationsPage() {
   // 今日以降のすべての予約を取得し、患者情報(user)と治療情報(treatment)も一緒に取ってくる
@@ -22,6 +23,20 @@ export default async function DoctorReservationsPage() {
     },
   });
 
+  // カレンダー用のデータ形式に変換する処理を
+  const calendarEvents = reservations.map((res) => {
+    const isCancelled = res.status === "CANCELLED";
+    return {
+      id: res.id,
+      title: `${res.user.name}様 (${res.treatment.name})`,
+      start: res.startTime,
+      end: res.endTime,
+      // キャンセル済みの場合は灰色、確定している場合は青色
+      backgroundColor: isCancelled ? "#cbd5e1" : "#3b82f6",
+      borderColor: isCancelled ? "#94a3b8" : "#2563eb",
+    };
+  });
+
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -29,6 +44,10 @@ export default async function DoctorReservationsPage() {
         <Link href="/" className="text-blue-600 hover:underline">← ダッシュボードへ</Link>
       </div>
 
+      {/* 作成したカレンダーを配置 */}
+      <DoctorCalendar events={calendarEvents} />
+
+      <h2 className="text-xl font-bold mb-4 mt-8">予約一覧（詳細）</h2>
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         {reservations.length === 0 ? (
           <p className="p-6 text-gray-500 text-center">現在、今後の予約は入っていません。</p>
