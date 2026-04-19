@@ -96,3 +96,35 @@ export async function createReservation(dateStr: string, timeStr: string, treatm
     },
   });
 }
+
+// 自分の予約一覧を取得する
+export async function getMyAppointments() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return [];
+
+  return await prisma.reservation.findMany({
+    where: { 
+      userId: session.user.id,
+      status: "CONFIRMED", // 確定済みのものだけ
+      startTime: { gte: new Date() } // 未来の予約だけ表示（任意）
+    },
+    include: {
+      treatment: true // 治療内容（名前や時間）も一緒に取得
+    },
+    orderBy: {
+      startTime: 'asc'
+    }
+  });
+}
+
+// 予約をキャンセルする
+export async function cancelReservation(formData: FormData) {
+  const id = formData.get("id") as string;
+  
+  await prisma.reservation.update({
+    where: { id },
+    data: { status: 'CANCELLED' }
+  });
+
+  revalidatePath("/");
+}

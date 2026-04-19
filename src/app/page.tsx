@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getMyAppointments } from "@/features/reservation/actions";
+import ReservationList from "@/features/reservation/components/ReservationList";
 
 export default async function Home() {
   // サーバー側でログイン状態を取得
@@ -16,6 +18,9 @@ export default async function Home() {
 
   // session.user.role には "DOCTOR" か "PATIENT" が入っています
   const isDoctor = session.user.role === "DOCTOR";
+
+  // 患者の場合、自分の予約を取得
+  const appointments = !isDoctor ? await getMyAppointments() : [];
 
   return (
     <main className="min-h-screen p-8 bg-gray-50 text-gray-800">
@@ -31,6 +36,7 @@ export default async function Home() {
 
         {/* ロールによる表示の切り替え */}
         {isDoctor ? (
+          /* --- 院長用ダッシュボード --- */
           <div className="p-6 bg-blue-50 border border-blue-200 rounded-md">
             <h2 className="text-xl font-bold text-blue-800 mb-4">🏥 院長用ダッシュボード</h2>
             <p className="mb-4">ここに以下の機能を実装していきます：</p>
@@ -49,19 +55,29 @@ export default async function Home() {
             </ul>
           </div>
         ) : (
-          <div className="p-6 bg-green-50 border border-green-200 rounded-md">
-            <h2 className="text-xl font-bold text-green-800 mb-4">🦷 患者用ダッシュボード</h2>
-            <p className="mb-4">ここに以下の機能を実装していきます：</p>
-            <ul className="list-disc ml-6 space-y-2 text-green-900">
-              <li>
-                <Link href="/patient/reserve" className="underline font-bold hover:text-green-700">
-                新規予約の作成（空き時間の検索）
-                </Link>
-              </li>
-              <li>過去の予約履歴の確認</li>
-              <li>予約のキャンセル手続き</li>
-            </ul>
-          </div>
+          /* --- 患者用ダッシュボード --- */
+          <>
+            {/* 1. 案内ボックス */}
+            <div className="p-6 bg-green-50 border border-green-200 rounded-md">
+              <h2 className="text-xl font-bold text-green-800 mb-4">🦷 患者用ダッシュボード</h2>
+              <p className="mb-4">ここに以下の機能を実装していきます：</p>
+              <ul className="list-disc ml-6 space-y-2 text-green-900">
+                <li>
+                  <Link href="/patient/reserve" className="underline font-bold hover:text-green-700">
+                  新規予約の作成（空き時間の検索）
+                  </Link>
+                </li>
+                <li>過去の予約履歴の確認</li>
+                <li>予約のキャンセル手続き</li>
+              </ul>
+            </div>
+
+            {/* 2. 予約状況（ここに追加しました） */}
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4">🗓️ あなたの予約状況</h2>
+              <ReservationList appointments={appointments} />
+            </div>
+          </>
         )}
       </div>
     </main>
