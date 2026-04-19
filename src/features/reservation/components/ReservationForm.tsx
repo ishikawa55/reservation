@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { getAvailableSlots, createReservation } from "../actions";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type Treatment = { id: string; name: string; duration: number };
 
@@ -24,8 +25,13 @@ export default function ReservationForm({ treatments }: { treatments: Treatment[
     try {
       const slots = await getAvailableSlots(date, treatmentId);
       setAvailableSlots(slots);
+      if (slots.length === 0) {
+        toast.error("この日は予約がいっぱいです");
+      } else {
+        toast.success("空き枠を取得しました");
+      }
     } catch (error) {
-      alert("空き枠の取得に失敗しました");
+      toast.error("空き枠の取得に失敗しました");
     }
     setIsLoading(false);
   };
@@ -36,10 +42,10 @@ export default function ReservationForm({ treatments }: { treatments: Treatment[
     setIsLoading(true);
     try {
       await createReservation(date, selectedSlot, treatmentId);
-      alert("予約が完了しました！");
+      toast.success("予約が完了しました！");
       router.push("/"); // トップページへ戻る
     } catch (error: any) {
-      alert(error.message || "予約に失敗しました");
+      toast.error(error.message || "予約に失敗しました");
     }
     setIsLoading(false);
   };

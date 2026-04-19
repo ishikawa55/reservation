@@ -6,6 +6,7 @@ import "./globals.css";
 import Header from "@/components/layouts/Header";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,9 @@ export default async function RootLayout({
   return (
     <html lang="ja">
       <body className={`${inter.className} bg-gray-50 text-gray-800 min-h-screen flex flex-col`}>
+        {/* 画面の中央上に通知が出るように設定 */}
+        <Toaster position="top-center" />
+
         {/* 作成したヘッダーを配置。ログインしていれば名前を渡す */}
         <Header userName={session?.user?.name || undefined} />
         
