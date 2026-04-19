@@ -1,31 +1,14 @@
 // src/app/doctor/treatments/page.tsx
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import TreatmentForm from "@/features/treatment/components/TreatmentForm";
+import { deleteTreatment } from "@/features/treatment/actions";
 
 export default async function TreatmentManagementPage() {
-  // サーバーコンポーネント内で直接DBから取得
   const treatments = await prisma.treatment.findMany({
     orderBy: { duration: "asc" },
   });
-
-  // 追加処理（Server Action）
-  async function addTreatment(formData: FormData) {
-    "use server";
-    const name = formData.get("name") as string;
-    const duration = parseInt(formData.get("duration") as string);
-    await prisma.treatment.create({ data: { name, duration } });
-    revalidatePath("/doctor/treatments");
-  }
-
-  // 削除処理（Server Action）
-  async function removeTreatment(formData: FormData) {
-    "use server";
-    const id = formData.get("id") as string;
-    await prisma.treatment.delete({ where: { id } });
-    revalidatePath("/doctor/treatments");
-  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -34,28 +17,8 @@ export default async function TreatmentManagementPage() {
         <Link href="/" className="text-blue-600 hover:underline">← ダッシュボードへ</Link>
       </div>
 
-      {/* 新規追加フォーム */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
-        <h2 className="text-lg font-semibold mb-4">新規メニュー登録</h2>
-        <form action={addTreatment} className="flex gap-4">
-          <input
-            name="name"
-            placeholder="治療名 (例: 定期検診)"
-            required
-            className="flex-grow border rounded px-3 py-2"
-          />
-          <input
-            name="duration"
-            type="number"
-            placeholder="所要時間 (分)"
-            required
-            className="w-32 border rounded px-3 py-2"
-          />
-          <button className="bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700">
-            登録
-          </button>
-        </form>
-      </div>
+      {/* 先ほど作ったクライアントコンポーネントを配置 */}
+      <TreatmentForm />
 
       {/* 一覧表示 */}
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -73,7 +36,8 @@ export default async function TreatmentManagementPage() {
                 <td className="px-6 py-4">{t.name}</td>
                 <td className="px-6 py-4">{t.duration} 分</td>
                 <td className="px-6 py-4">
-                  <form action={removeTreatment}>
+                  {/* 削除も新しいアクションファイルのものを使います */}
+                  <form action={deleteTreatment}>
                     <input type="hidden" name="id" value={t.id} />
                     <button className="text-red-500 hover:text-red-700 text-sm font-bold">
                       削除
