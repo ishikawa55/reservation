@@ -53,7 +53,11 @@ export default async function Home() {
             <h2 className="text-xl font-bold text-green-800 mb-4">🦷 患者用ダッシュボード</h2>
             <p className="mb-4">ここに以下の機能を実装していきます：</p>
             <ul className="list-disc ml-6 space-y-2 text-green-900">
-              <li>新規予約の作成（空き時間の検索）</li>
+              <li>
+                <Link href="/patient/reserve" className="underline font-bold hover:text-green-700">
+                新規予約の作成（空き時間の検索）
+                </Link>
+              </li>
               <li>過去の予約履歴の確認</li>
               <li>予約のキャンセル手続き</li>
             </ul>
