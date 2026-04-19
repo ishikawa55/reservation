@@ -55,3 +55,14 @@ enum Status {
   CONFIRMED
   CANCELLED
 }
+
+// 診察時間の設定
+model BusinessHour {
+  id        String   @id @default(cuid())
+  dayOfWeek Int      // 0(日)〜6(土)
+  openTime  String   // "09:00" 形式
+  closeTime String   // "18:00" 形式
+  isClosed  Boolean  @default(false) // 休診日フラグ
+
+  @@unique([dayOfWeek])
+}

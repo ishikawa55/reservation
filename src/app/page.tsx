@@ -40,8 +40,12 @@ export default async function Home() {
                 <Link href="/doctor/treatments" className="underline font-bold">
                 治療メニュー（所要時間）の登録・編集
                 </Link>
-                </li>
-              <li>休診日や営業時間の枠設定</li>
+              </li>
+              <li>
+                <Link href="/doctor/business-hours" className="underline font-bold hover:text-blue-700">
+                休診日や営業時間の枠設定
+                </Link>
+              </li>
             </ul>
           </div>
         ) : (
